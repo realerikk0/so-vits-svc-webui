@@ -50,4 +50,4 @@ class VitsGradio:
 
 if __name__ == "__main__":
     grVits = VitsGradio()
-    grVits.Vits.launch()
+    grVits.Vits.launch(server_port=7870)
