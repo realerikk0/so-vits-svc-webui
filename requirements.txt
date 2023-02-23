@@ -1,0 +1,14 @@
+gradio==3.4.1
+librosa
+# torch==1.10.0+cu113
+# torchaudio==0.10.0+cu113
+torch==1.10.0
+torchaudio==0.10.0
+scipy==1.7.3
+numpy
+SoundFile==0.10.3.post1
+praat-parselmouth
+scikit-maad
+torchvision
+fairseq
+pyworld
