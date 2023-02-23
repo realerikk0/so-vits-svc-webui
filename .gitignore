@@ -1,3 +1,8 @@
 checkpoints/*
 hubert/*.pt
 *.wav
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
