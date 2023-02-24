@@ -62,11 +62,14 @@ class VitsGradio:
         self.lspk = []
         print(f"path: {path}, device: {device}")
         self.so.set_device(device)
+        print(f"device set.")
         self.so.load_checkpoint(path)
+        print(f"checkpoint loaded")
         for spk, sid in self.so.hps_ms.spk.items():
             self.lspk.append(spk)
         VChange = gr.update(visible=True)
         SDChange = gr.update(choices=self.lspk, value=self.lspk[0])
+        print("allset display")
         return [SDChange, VChange]
 
 
