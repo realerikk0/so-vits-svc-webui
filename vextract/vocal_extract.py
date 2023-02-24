@@ -27,9 +27,13 @@ class VEX(object):
         accompaniment_file = f"output/samtmpwav/accompaniment.wav"
 
         vocal_rate, vocal_audio = read(vocal_file)
+        vocal_audio = (vocal_audio / np.iinfo(audio.dtype).max).astype(np.float32)
         vocal_audio = librosa.resample(vocal_audio, orig_sr=vocal_rate, target_sr=sampling_rate)
+        vocal_audio = (np.array(vocal_audio) * 32768).astype('int16')
         accompaniment_rate, accompaniment_audio = read(accompaniment_file)
+        accompaniment_audio = (accompaniment_audio / np.iinfo(audio.dtype).max).astype(np.float32)
         accompaniment_audio = librosa.resample(accompaniment_audio, orig_sr=accompaniment_rate, target_sr=sampling_rate)
+        accompaniment_audio = (np.array(accompaniment_audio) * 32768).astype('int16')
 
         return [(sampling_rate, vocal_audio), (sampling_rate, accompaniment_audio)]
 

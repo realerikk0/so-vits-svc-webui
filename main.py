@@ -3,6 +3,8 @@ from vextract.vocal_extract import VEX
 import gradio as gr
 import os
 
+os.environ['CUDA_VISIBLE_DEVICES'] = '1,2'
+
 
 class VitsGradio:
     def __init__(self):
