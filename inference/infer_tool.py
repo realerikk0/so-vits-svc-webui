@@ -139,6 +139,8 @@ class Svc(object):
         cluster_model_path = f"checkpoints/{path}/kmeans_10000.pt"
         if os.path.exists(cluster_model_path):
             self.cluster_model = cluster.get_cluster_model(cluster_model_path)
+        else:
+            self.cluster_model = None
 
     def load_model(self):
         # 获取模型配置
@@ -169,7 +171,7 @@ class Svc(object):
         c = utils.get_hubert_content(self.hubert_model, wav_16k_tensor=wav16k)
         c = utils.repeat_expand_2d(c.squeeze(0), f0.shape[1])
 
-        if cluster_infer_ratio != 0:
+        if self.cluster_model is not None and cluster_infer_ratio != 0:
             cluster_c = cluster.get_cluster_center_result(self.cluster_model, c.cpu().numpy().T, speaker).T
             cluster_c = torch.FloatTensor(cluster_c).to(self.dev)
             c = cluster_infer_ratio * cluster_c + (1 - cluster_infer_ratio) * c
