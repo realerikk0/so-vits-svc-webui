@@ -21,15 +21,15 @@ class VEX(object):
         sample_tmp_wav_filename = "samtmpwav.wav"
         soundfile.write(sample_tmp_wav_filename, audio, 16000, format="wav")
 
-        os.system(f"spleeter separate -p spleeter:4stems-16kHz -o output {sample_tmp_wav_filename}")
+        os.system(f"spleeter separate -p spleeter:2stems-16kHz -o output {sample_tmp_wav_filename}")
 
-        vocal_file = f"output/vocals.wav"
-        accompaniment_file = f"output/accompaniment.wav"
+        vocal_file = f"output/samtmpwav/vocals.wav"
+        accompaniment_file = f"output/samtmpwav/accompaniment.wav"
 
-        vocal_audio = read(vocal_file)
-        vocal_audio = librosa.resample(vocal_audio, orig_sr=16000, target_sr=sampling_rate)
-        accompaniment_audio = read(accompaniment_file)
-        accompaniment_audio = librosa.resample(accompaniment_audio, orig_sr=16000, target_sr=sampling_rate)
+        vocal_rate, vocal_audio = read(vocal_file)
+        vocal_audio = librosa.resample(vocal_audio, orig_sr=vocal_rate, target_sr=sampling_rate)
+        accompaniment_rate, accompaniment_audio = read(accompaniment_file)
+        accompaniment_audio = librosa.resample(accompaniment_audio, orig_sr=accompaniment_rate, target_sr=sampling_rate)
 
         return [(sampling_rate, vocal_audio), (sampling_rate, accompaniment_audio)]
 

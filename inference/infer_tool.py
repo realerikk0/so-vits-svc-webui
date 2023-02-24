@@ -115,9 +115,9 @@ class Svc(object):
 
     def set_device(self, device):
         self.dev = torch.device(device)
-        self.hubert_model = utils.get_hubert_model().to(self.dev)
-        if self.net_g_ms != None:
-            self.net_g_ms.to(device)
+        # self.hubert_model = utils.get_hubert_model().to(self.dev)
+        # if self.net_g_ms != None:
+        #     self.net_g_ms.to(device)
 
     def load_checkpoint(self, path):
         self.hps_ms = utils.get_hparams_from_file(f"checkpoints/{path}/config.json")
