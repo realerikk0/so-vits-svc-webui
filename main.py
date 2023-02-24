@@ -21,7 +21,7 @@ class VitsGradio:
                 - 输入音频需要是干净的人声哦
                 """
             )
-            with gr.Tab("人声提取", visible=self.testSpleeter()):
+            with gr.Tab("人声提取"):
                 with gr.Row():
                     with gr.Column():
                         sample_audio = gr.Audio(label="输入音频")
@@ -68,13 +68,6 @@ class VitsGradio:
         VChange = gr.update(visible=True)
         SDChange = gr.update(choices=self.lspk, value=self.lspk[0])
         return [SDChange, VChange]
-
-    def testSpleeter(self):
-        try:
-            import spleeter
-            return True
-        except ImportError:
-            return False
 
 
 if __name__ == "__main__":
