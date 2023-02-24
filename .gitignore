@@ -4,5 +4,6 @@ hubert/*.pt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
+pretrained_models/
 *.py[cod]
 *$py.class

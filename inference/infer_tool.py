@@ -113,17 +113,6 @@ class Svc(object):
         self.hop_size = None
         self.spk2id = None
 
-        # self.hps_ms = utils.get_hparams_from_file(config_path)
-        # self.target_sample = self.hps_ms.data.sampling_rate
-        # self.hop_size = self.hps_ms.data.hop_length
-        # self.spk2id = self.hps_ms.spk
-
-        # 加载hubert
-        # self.hubert_model = utils.get_hubert_model().to(self.dev)
-        # self.load_model()
-        # if os.path.exists(cluster_model_path):
-        #     self.cluster_model = cluster.get_cluster_model(cluster_model_path)
-
     def set_device(self, device):
         self.dev = torch.device(device)
         self.hubert_model = utils.get_hubert_model().to(self.dev)
@@ -143,11 +132,6 @@ class Svc(object):
         )
         _ = utils.load_checkpoint(f"checkpoints/{path}/model.pth", self.net_g_ms, None)
         _ = self.net_g_ms.eval().to(self.dev)
-
-        # if "half" in self.net_g_path and torch.cuda.is_available():
-        #     _ = self.net_g_ms.half().eval().to(self.dev)
-        # else:
-        #     _ = self.net_g_ms.eval().to(self.dev)
 
         # 加载hubert
         self.hubert_model = utils.get_hubert_model().to(self.dev)
@@ -200,8 +184,7 @@ class Svc(object):
         speaker_id = self.spk2id[speaker]
         sid = torch.LongTensor([int(speaker_id)]).to(self.dev).unsqueeze(0)
         c, f0, uv = self.get_unit_f0(raw_path, tran, cluster_infer_ratio, speaker)
-        # if "half" in self.net_g_path and torch.cuda.is_available():
-        #     c = c.half()
+
         with torch.no_grad():
             start = time.time()
             audio = self.net_g_ms.infer(c, f0=f0, g=sid, uv=uv, predict_f0=auto_predict_f0, noice_scale=noice_scale)[
@@ -242,7 +225,8 @@ class Svc(object):
             audio.extend(list(_audio))
         return np.array(audio)
 
-    def inference(self, srcaudio, chara, tran, slice_db):
+    def inference(self, srcaudio, chara, tran, slice_db, ns):
+        self.noice_scale = ns
         sampling_rate, audio = srcaudio
         audio = (audio / np.iinfo(audio.dtype).max).astype(np.float32)
         if len(audio.shape) > 1:
@@ -279,36 +263,3 @@ class Svc(object):
             audio.extend(list(_audio))
         audio = (np.array(audio) * 32768).astype('int16')
         return (self.hps_ms.data.sampling_rate, audio)
-
-
-# class RealTimeVC:
-#     def __init__(self):
-#         self.last_chunk = None
-#         self.last_o = None
-#         self.chunk_len = 16000  # 区块长度
-#         self.pre_len = 3840  # 交叉淡化长度，640的倍数
-#
-#     """输入输出都是1维numpy 音频波形数组"""
-#
-#     def process(self, svc_model, speaker_id, f_pitch_change, input_wav_path):
-#         import maad
-#         audio, sr = torchaudio.load(input_wav_path)
-#         audio = audio.cpu().numpy()[0]
-#         temp_wav = io.BytesIO()
-#         if self.last_chunk is None:
-#             input_wav_path.seek(0)
-#             audio, sr = svc_model.infer(speaker_id, f_pitch_change, input_wav_path)
-#             audio = audio.cpu().numpy()
-#             self.last_chunk = audio[-self.pre_len:]
-#             self.last_o = audio
-#             return audio[-self.chunk_len:]
-#         else:
-#             audio = np.concatenate([self.last_chunk, audio])
-#             soundfile.write(temp_wav, audio, sr, format="wav")
-#             temp_wav.seek(0)
-#             audio, sr = svc_model.infer(speaker_id, f_pitch_change, temp_wav)
-#             audio = audio.cpu().numpy()
-#             ret = maad.util.crossfade(self.last_o, audio, self.pre_len)
-#             self.last_chunk = audio[-self.pre_len:]
-#             self.last_o = audio
-#             return ret[self.chunk_len:2 * self.chunk_len]
