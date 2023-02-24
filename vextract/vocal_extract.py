@@ -1,8 +1,9 @@
+import os
+
 import librosa
 import numpy as np
 import soundfile
-from spleeter.separator import Separator
-from spleeter.audio.adapter import AudioAdapter
+from scipy.io.wavfile import read
 
 
 class VEX(object):
@@ -14,16 +15,21 @@ class VEX(object):
         audio = (audio / np.iinfo(audio.dtype).max).astype(np.float32)
         if len(audio.shape) > 1:
             audio = librosa.to_mono(audio.transpose(1, 0))
-        if sampling_rate != 44100:
-            audio = librosa.resample(audio, orig_sr=sampling_rate, target_sr=44100)
-        soundfile.write("samtmpwav.wav", audio, 44100, format="wav")
+        if sampling_rate != 16000:
+            audio = librosa.resample(audio, orig_sr=sampling_rate, target_sr=16000)
 
-        separator = Separator('spleeter:2stems')
+        sample_tmp_wav_filename = "samtmpwav.wav"
+        soundfile.write(sample_tmp_wav_filename, audio, 16000, format="wav")
 
-        audio_loader = AudioAdapter.default()
-        waveform, _ = audio_loader.load("samtmpwav.wav", sample_rate=44100)
+        os.system(f"spleeter separate -p spleeter:4stems-16kHz -o output {sample_tmp_wav_filename}")
 
-        prediction = separator.separate(waveform)
+        vocal_file = f"output/vocals.wav"
+        accompaniment_file = f"output/accompaniment.wav"
 
-        return [(44100, prediction['vocals']), (44100,prediction['accompaniment'])]
+        vocal_audio = read(vocal_file)
+        vocal_audio = librosa.resample(vocal_audio, orig_sr=16000, target_sr=sampling_rate)
+        accompaniment_audio = read(accompaniment_file)
+        accompaniment_audio = librosa.resample(accompaniment_audio, orig_sr=16000, target_sr=sampling_rate)
+
+        return [(sampling_rate, vocal_audio), (sampling_rate, accompaniment_audio)]
 
