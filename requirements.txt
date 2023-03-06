@@ -1,9 +1,11 @@
-gradio==3.4.1
+gradio==3.20.0
 librosa
-# torch==1.10.0+cu113
-# torchaudio==0.10.0+cu113
-torch==1.10.0
-torchaudio==0.10.0
+--extra-index-url https://download.pytorch.org/whl/cu113
+torch==1.10.0+cu113
+--extra-index-url https://download.pytorch.org/whl/cu113
+torchaudio==0.10.0+cu113
+# torch==1.10.0
+# torchaudio==0.10.0
 scipy==1.7.3
 numpy
 SoundFile==0.10.3.post1

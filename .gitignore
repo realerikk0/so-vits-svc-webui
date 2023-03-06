@@ -7,3 +7,5 @@ __pycache__/
 pretrained_models/
 *.py[cod]
 *$py.class
+
+.idea/
