@@ -146,9 +146,10 @@ class VitsGradio:
         else:
             VChange = gr.update(visible=False)
             VBChange = gr.update(visible=True)
-        SDChange = gr.update(choices=self.lspk, value=self.lspk[0])
+        SD0Change = gr.update(choices=self.lspk, value=self.lspk[0])
+        SD1Change = gr.update(choices=self.lspk, value=self.lspk[0])
         print("allset update display")
-        return [SDChange, SDChange, VChange, VBChange]
+        return [SD0Change, SD1Change, VChange, VBChange]
 
 
 if __name__ == "__main__":
