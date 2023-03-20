@@ -20,8 +20,8 @@ class VitsGradio:
             gr.Markdown(
                 """
                 # 歌声合成工具
-                - 请依次选择声音模型、设备以及处理模式，然后点击"载入模型"
-                - 输入音频需要是干净的人声哦
+                - 请依次选择语音模型、设备以及运行模式，然后点击"载入模型"
+                - 输入音频需要是干净的人声
                 """
             )
             with gr.Tab("人声提取"):
@@ -46,7 +46,7 @@ class VitsGradio:
                             with gr.Column():
                                 with gr.Row():
                                     with gr.Column():
-                                        self.dsid = gr.Dropdown(label="目标角色", choices=self.lspk)
+                                        self.dsid0 = gr.Dropdown(label="目标角色", choices=self.lspk)
                                         self.tran = gr.Slider(label="升降调", maximum=60, minimum=-60, step=1, value=0)
                                         self.th = gr.Slider(label="切片阈值", maximum=32767, minimum=-32768, step=0.1,
                                                             value=-40)
@@ -54,7 +54,7 @@ class VitsGradio:
                                                             value=0.4)
                         with gr.Row():
                             self.VCOutputs = gr.Audio()
-                    self.btnVC.click(self.so.inference, inputs=[self.srcaudio, self.dsid, self.tran, self.th, self.ns],
+                    self.btnVC.click(self.so.inference, inputs=[self.srcaudio, self.dsid0, self.tran, self.th, self.ns],
                                      outputs=[self.VCOutputs], show_progress=True)
 
                 with gr.Row(visible=False) as self.VoiceBatchConversion:
@@ -67,7 +67,7 @@ class VitsGradio:
                             with gr.Column():
                                 with gr.Row():
                                     with gr.Column():
-                                        self.dsid = gr.Dropdown(label="目标角色", choices=self.lspk)
+                                        self.dsid1 = gr.Dropdown(label="目标角色", choices=self.lspk)
                                         self.tran = gr.Slider(label="升降调", maximum=60, minimum=-60, step=1, value=0)
                                         self.th = gr.Slider(label="切片阈值", maximum=32767, minimum=-32768, step=0.1,
                                                             value=-40)
@@ -75,7 +75,7 @@ class VitsGradio:
                                                             value=0.4)
                         with gr.Row():
                             self.VCOutputs = gr.File(label="Output Zip File", interactive=False)
-                    self.btnVC.click(self.batch_inference, inputs=[self.srcaudio, self.dsid, self.tran, self.th, self.ns],
+                    self.btnVC.click(self.batch_inference, inputs=[self.srcaudio, self.dsid1, self.tran, self.th, self.ns],
                                      outputs=[self.VCOutputs], show_progress=True)
 
                 with gr.Row():
@@ -83,11 +83,11 @@ class VitsGradio:
                         modelstrs = gr.Dropdown(label="模型", choices=self.modelPaths, value=self.modelPaths[0],
                                                 type="value")
                         devicestrs = gr.Dropdown(label="设备", choices=["cpu", "cuda"], value="cuda", type="value")
-                        isbatchmod = gr.Radio(label="选择运行模式", choices=["single", "batch"], value="single",
-                                              info="批量处理支持上传多个文件")
+                        isbatchmod = gr.Radio(label="运行模式", choices=["single", "batch"], value="single",
+                                              info="single: 单个文件处理. batch:批量处理支持上传多个文件")
                         btnMod = gr.Button("载入模型")
                         btnMod.click(self.loadModel, inputs=[modelstrs, devicestrs, isbatchmod],
-                                     outputs=[self.dsid, self.VoiceConversion, self.VoiceBatchConversion],
+                                     outputs=[self.dsid0, self.dsid1, self.VoiceConversion, self.VoiceBatchConversion],
                                      show_progress=True)
 
     def batch_inference(self, files, chara, tran, slice_db, ns, progress=gr.Progress()):
@@ -139,6 +139,7 @@ class VitsGradio:
         print(f"checkpoint loaded")
         for spk, sid in self.so.hps_ms.spk.items():
             self.lspk.append(spk)
+        print(f"LSPK: {self.lspk}")
         if process_mode == "single":
             VChange = gr.update(visible=True)
             VBChange = gr.update(visible=False)
@@ -146,10 +147,12 @@ class VitsGradio:
             VChange = gr.update(visible=False)
             VBChange = gr.update(visible=True)
         SDChange = gr.update(choices=self.lspk, value=self.lspk[0])
-        print("allset display")
-        return [SDChange, VChange, VBChange]
+        print("allset update display")
+        return [SDChange, SDChange, VChange, VBChange]
 
 
 if __name__ == "__main__":
     grVits = VitsGradio()
-    grVits.Vits.queue(concurrency_count=1).launch(server_port=7870)
+    grVits.Vits\
+        .queue(concurrency_count=20, status_update_rate=5.0)\
+        .launch(server_port=7870, share=True, show_api=True)

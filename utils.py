@@ -402,6 +402,9 @@ def get_hparams_from_file(config_path):
     config = json.loads(data)
 
     hparams = HParams(**config)
+
+    logger.info("Loaded config '{}' (config: {})".format(
+        config_path, hparams))
     return hparams
 
 

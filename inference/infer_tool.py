@@ -192,7 +192,7 @@ class Svc(object):
             audio = self.net_g_ms.infer(c, f0=f0, g=sid, uv=uv, predict_f0=auto_predict_f0, noice_scale=noice_scale)[
                 0, 0].data.float()
             use_time = time.time() - start
-            print("vits use time:{}".format(use_time))
+            print("VITS use time:{}".format(use_time))
         return audio, audio.shape[-1]
 
     def slice_inference(self, raw_audio_path, spk, tran, slice_db, cluster_infer_ratio, auto_predict_f0, noice_scale,
