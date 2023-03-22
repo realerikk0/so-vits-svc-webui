@@ -14,3 +14,5 @@ scikit-maad
 torchvision
 fairseq
 pyworld
+aiohttp==3.8.4
+tornado

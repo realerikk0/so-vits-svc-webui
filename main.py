@@ -31,7 +31,7 @@ class VitsGradio:
                         extractAudioBtn = gr.Button("提取人声")
                 with gr.Row():
                     with gr.Column():
-                        self.sample_vocal_output = gr.Audio()
+                        self.sample_vocal_output = gr.Audio(label="输出音频")
                         self.sample_accompaniment_output = gr.Audio()
                 extractAudioBtn.click(self.v.separate, inputs=[sample_audio],
                                       outputs=[self.sample_vocal_output, self.sample_accompaniment_output],
