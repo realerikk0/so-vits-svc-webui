@@ -5,8 +5,8 @@ import logging.handlers
 import os
 import tornado.ioloop
 import tornado.web
-
 import config
+import api.svc
 
 logger = logging.getLogger(__name__)
 
@@ -15,12 +15,21 @@ WEB_ROOT = os.path.join(BASE_PATH, 'frontend', 'dist')
 LOG_FILE_NAME = os.path.join(BASE_PATH, 'log', 'sovits-webui.log')
 
 routes = [
-
+    (r'/api/svc/model', api.svc.ModelListHandler),
+    (r'/api/svc/switch', api.svc.SwitchHandler),
+    (r'/api/svc/run', api.svc.SingleInferenceHandler),
+    (r'/api/svc/batch', api.svc.BatchInferenceHandler),
 ]
 
 
 def main():
-    pass
+    args = parse_args()
+
+    init_logging(args.debug)
+    config.init()
+    api.svc.init()
+
+    run_server(args.host, args.port, args.debug)
 
 
 def parse_args():
@@ -76,3 +85,7 @@ def run_server(host, port, debug):
         tornado.ioloop.IOLoop.current().start()
     except KeyboardInterrupt:
         tornado.ioloop.IOLoop.current().instance().stop()
+
+
+if __name__ == '__main__':
+    main()
