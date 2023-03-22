@@ -25,6 +25,8 @@ def init():
     # construct the path to the "checkpoints" directory
     checkpoints_dir = os.path.join(parent_dir, "checkpoints")
 
+    logger.debug(f"CkPoints Dir: {checkpoints_dir}")
+
     for root, dirs, files in os.walk(checkpoints_dir):
         for dir in dirs:
             _model_paths.append(dir)

@@ -6,6 +6,7 @@ import os
 import tornado.ioloop
 import tornado.web
 import config
+import api.main
 import api.svc
 
 logger = logging.getLogger(__name__)
@@ -19,6 +20,8 @@ routes = [
     (r'/api/svc/switch', api.svc.SwitchHandler),
     (r'/api/svc/run', api.svc.SingleInferenceHandler),
     (r'/api/svc/batch', api.svc.BatchInferenceHandler),
+
+    (r'/(.*)', api.main.MainHandler, {'path': WEB_ROOT, 'default_filename': 'index.html'})
 ]
 
 
