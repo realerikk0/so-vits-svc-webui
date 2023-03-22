@@ -35,7 +35,7 @@ class VitsGradio:
                         self.sample_accompaniment_output = gr.Audio()
                 extractAudioBtn.click(self.v.separate, inputs=[sample_audio],
                                       outputs=[self.sample_vocal_output, self.sample_accompaniment_output],
-                                      show_progress=True)
+                                      show_progress=True, api_name="extract")
             with gr.Tab("歌声合成"):
                 with gr.Row(visible=False) as self.VoiceConversion:
                     with gr.Column():
@@ -55,7 +55,7 @@ class VitsGradio:
                         with gr.Row():
                             self.VCOutputs = gr.Audio()
                     self.btnVC.click(self.so.inference, inputs=[self.srcaudio, self.dsid0, self.tran, self.th, self.ns],
-                                     outputs=[self.VCOutputs], show_progress=True)
+                                     outputs=[self.VCOutputs], show_progress=True, api_name="run")
 
                 with gr.Row(visible=False) as self.VoiceBatchConversion:
                     with gr.Column():
@@ -76,7 +76,7 @@ class VitsGradio:
                         with gr.Row():
                             self.VCOutputs = gr.File(label="Output Zip File", interactive=False)
                     self.btnVC.click(self.batch_inference, inputs=[self.srcaudio, self.dsid1, self.tran, self.th, self.ns],
-                                     outputs=[self.VCOutputs], show_progress=True)
+                                     outputs=[self.VCOutputs], show_progress=True, api_name="batch")
 
                 with gr.Row():
                     with gr.Column():
@@ -88,7 +88,7 @@ class VitsGradio:
                         btnMod = gr.Button("载入模型")
                         btnMod.click(self.loadModel, inputs=[modelstrs, devicestrs, isbatchmod],
                                      outputs=[self.dsid0, self.dsid1, self.VoiceConversion, self.VoiceBatchConversion],
-                                     show_progress=True)
+                                     show_progress=True, api_name="switch")
 
     def batch_inference(self, files, chara, tran, slice_db, ns, progress=gr.Progress()):
         from zipfile import ZipFile
