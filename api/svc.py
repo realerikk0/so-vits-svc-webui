@@ -20,13 +20,12 @@ def init():
     _model_paths = []
 
     # get the path to the parent directory
-    parent_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+    parent_dir = os.path.abspath(os.path.join(os.getcwd(), os.curdir))
 
     # construct the path to the "checkpoints" directory
     checkpoints_dir = os.path.join(parent_dir, "checkpoints")
 
     logger.debug(f"CkPoints Dir: {checkpoints_dir}")
-    print(f"CkPoints Dir: {checkpoints_dir}")
 
     for root, dirs, files in os.walk(checkpoints_dir):
         for dir in dirs:
@@ -221,10 +220,12 @@ class BatchInferenceHandler(api.base.ApiHandler):
         temp_dir_name = "temp"
 
         # get the path to the parent directory
-        parent_dir = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+        parent_dir = os.path.abspath(os.path.join(os.getcwd(), os.curdir))
 
         # construct the path to the "temp" directory
         temp_dir = os.path.join(parent_dir, temp_dir_name)
+
+        logger.debug(f"TempDir: {temp_dir}")
 
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
