@@ -107,6 +107,9 @@ class SwitchHandler(api.base.ApiHandler):
 class SingleInferenceHandler(api.base.ApiHandler):
     async def post(self):
         try:
+            from scipy.io import wavfile
+            import uuid
+
             dsid = self.get_argument("dsid", "")
             tran = self.get_argument("tran", "0")
             th = self.get_argument("th", "-40.0")
@@ -157,28 +160,34 @@ class SingleInferenceHandler(api.base.ApiHandler):
             th = float(th)
             ns = float(ns)
 
-            output_audio_array = _svc.inference(srcaudio=scraudio,
-                                                chara=dsid,
-                                                tran=tran,
-                                                slice_db=th,
-                                                ns=ns)
+            output_audio_sr, output_audio_array = _svc.inference(srcaudio=scraudio,
+                                                                 chara=dsid,
+                                                                 tran=tran,
+                                                                 slice_db=th,
+                                                                 ns=ns)
 
             logger.debug(f"svc for {audiofile_name} succeed.")
 
-            # create a new wave file for writing
-            with io.BytesIO() as file_stream:
-                with wave.open(file_stream, 'wb') as wave_file:
-                    # set the wave file parameters
-                    wave_file.setnchannels(output_audio_array.shape[1])
-                    wave_file.setsampwidth(2)
-                    wave_file.setframerate(44100)
-                    # write the audio data to the wave file
-                    wave_file.writeframes(output_audio_array.tobytes())
+            temp_wavfile = f"{uuid.uuid4()}.wav"
+            wavfile.write(temp_wavfile, output_audio_sr, output_audio_array)
 
-                # set the response headers and body
+            with wave.open(temp_wavfile, 'rb') as wave_file:
+                # create a new wave file for writing
                 self.set_header('Content-Type', 'audio/wav')
-                self.set_header('Content-Disposition', f'attachment; filename="svc_{audiofile_name}.wav"')
-                self.write(file_stream.getvalue())
+                self.set_header('Content-Disposition', 'attachment; filename="output.wav"')
+
+                chunk_size = 1024
+                while True:
+                    chunk = wave_file.readframes(chunk_size)
+
+                    if not chunk:
+                        break
+
+                    self.write(chunk)
+                    await self.flush()
+            await self.finish()
+            # os.remove(temp_wavfile)
+
         except Exception as e:
             logger.exception(e)
             self.set_status(500)
