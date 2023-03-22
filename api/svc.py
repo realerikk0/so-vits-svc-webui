@@ -26,6 +26,7 @@ def init():
     checkpoints_dir = os.path.join(parent_dir, "checkpoints")
 
     logger.debug(f"CkPoints Dir: {checkpoints_dir}")
+    print(f"CkPoints Dir: {checkpoints_dir}")
 
     for root, dirs, files in os.walk(checkpoints_dir):
         for dir in dirs:
