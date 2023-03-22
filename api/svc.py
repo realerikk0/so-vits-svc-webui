@@ -47,7 +47,7 @@ class SwitchHandler(api.base.ApiHandler):
     async def post(self):
         model_name = self.get_argument("model", "")  # model name
         mode = self.get_argument("mode", "single")  # running mode: single or batch
-        device = self.get_argument("mode", "cuda")  # "cpu" or "cuda"
+        device = self.get_argument("device", "cuda")  # "cpu" or "cuda"
 
         if model_name == "":
             self.set_status(400)
