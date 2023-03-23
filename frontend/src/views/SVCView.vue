@@ -54,15 +54,11 @@
               class="audio-upload"
               action=""
               accept=".wav"
-              :auto-upload="false"
+              :http-request="handleSingleUpload"
           >
             <template #trigger>
-              <el-button type="primary">选择音频文件</el-button>
+              <el-button type="primary" v-loading="isRuningSingle">选择音频文件并开始制作！</el-button>
             </template>
-
-            <el-button class="ml-3" type="success" @click="handleSingleUpload">
-              开始制作！
-            </el-button>
 
             <template #tip>
               <div class="el-upload__tip">
@@ -82,16 +78,14 @@
               class="audio-upload"
               action=""
               accept=".wav"
-              :auto-upload="false"
+              :http-request="mergeBatchFiles"
               multiple
           >
             <template #trigger>
               <el-button type="primary">选择音频文件</el-button>
             </template>
 
-            <el-button class="ml-3" type="success" @click="handleBatchUpload">
-              开始制作！
-            </el-button>
+            <el-button type="warning" v-loading="isRunningBatch" @click="handleBatchUpload">开始制作！</el-button>
 
             <template #tip>
               <div class="el-upload__tip">
@@ -103,14 +97,19 @@
       </div>
 
     </div>
+
+    <GreetingAudio :title="audioTitle" :src="audioSrc" v-if="audioLoaded"></GreetingAudio>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import JSZip from "jszip";
+import GreetingAudio from "@/components/GreetingAudio.vue";
 
 export default {
   name: 'SVCView',
+  components: {GreetingAudio},
   data() {
     return {
       models: [],
@@ -132,7 +131,11 @@ export default {
       displayBatchSVCForm: false,
       isLoadingModel: false,
       isRuningSingle: false,
-      isRunningBatch: false
+      isRunningBatch: false,
+      audioLoaded: false,
+      audioTitle: '',
+      audioSrc: '',
+      selectedFiles: []
     }
   },
   mounted() {
@@ -155,18 +158,26 @@ export default {
     },
     async loadModel() {
       try {
+        this.audioLoaded = false
+        this.selectedFiles = []
         this.isLoadingModel = true
         let initFormData = new FormData()
         initFormData.append("mode", this.initForm.mode)
         initFormData.append("device", this.initForm.device)
         initFormData.append("model", this.initForm.model)
+        if (this.initForm.mode === "" || this.initForm.model === "" || this.initForm.device === "") {
+          this.$message.error('都选一下。')
+          return
+        }
         let resp = (await axios.post('/api/svc/switch', initFormData)).data
         if (resp.code === 200) {
           this.displaySVCForm = true
           console.log(resp.data.mode)
           if (resp.data.mode === "single") {
             this.displaySingleSVCForm = true
+            this.displayBatchSVCForm = false
           } else if (resp.data.mode === "batch") {
+            this.displaySingleSVCForm = false
             this.displayBatchSVCForm = true
           }
         } else {
@@ -178,52 +189,98 @@ export default {
         this.isLoadingModel = false
       }
     },
-    async handleSingleUpload() {
+    async handleSingleUpload(file) {
       try {
-        let uploadComponent = this.$refs.audioSingleUpload
-        let srcaudio = uploadComponent.uploadFiles[0]
+        this.isRuningSingle = true
+        this.isLoadingModel = true
+        console.log("HANDLE UPLOAD")
+        console.log(file)
+        let srcaudio = file.file
         if (srcaudio) {
+          console.log(srcaudio)
+          let audioFileName = srcaudio.name
           let runData = new FormData()
-          runData.append("srcaudio", srcaudio.raw)
+          runData.append("srcaudio", srcaudio)
           runData.append("dsid", this.initForm.model)
 
-          let resp = await axios.post('/api/svc/run', runData)
+          let resp = await axios.post('/api/svc/run', runData, {
+            responseType: 'arraybuffer'
+          })
           if (resp.status === 200) {
-            // todo: 生成一个音频播放器
-            // todo: resp.data audio/wav
+            const audioData = resp.data
+            if (audioData) {
+              const audioBlob = new Blob([audioData], { type: 'audio/wav' });
+              const audioUrl = URL.createObjectURL(audioBlob);
+
+              this.audioLoaded = true
+              this.audioSrc = audioUrl
+              this.audioTitle = audioFileName
+            }
           } else {
             this.$message.error('Failed to load model: ' + resp.data.msg)
+            this.isRuningSingle = false
+            this.isLoadingModel = false
           }
         } else {
           this.$message.error('Error unable to get audio file')
+          this.isRuningSingle = false
+          this.isLoadingModel = false
         }
       } catch (e) {
         this.$message.error('Failed to run: ' + e)
+      } finally {
+        this.isRuningSingle = false
+        this.isLoadingModel = false
       }
+    },
+    mergeBatchFiles(file) {
+      this.selectedFiles.push(file.file)
     },
     async handleBatchUpload() {
       try {
-        let uploadComponent = this.$refs.audioBatchUpload
-        const audioFiles = uploadComponent.uploadFiles
+        this.isRunningBatch = true
+        this.isLoadingModel = true
+
+        const audioFiles = this.selectedFiles
         if (audioFiles.length > 0) {
           let runData = new FormData()
-          for (let file in audioFiles) {
-            runData.append('srcaudio[]', file.raw)
+          // runData.append('srcaudio', audioFiles)
+          for (let i = 0; i < audioFiles.length; i++) {
+            runData.append('srcaudio', audioFiles[i])
           }
           runData.append("dsid", this.initForm.model)
 
-          let resp = await axios.post('/api/svc/batch', runData)
+          let resp = await axios.post('/api/svc/batch', runData, {
+            responseType: 'arraybuffer'
+          })
           if (resp.status === 200) {
-            // todo: 生成一个下载
-            // todo: resp.data application/zip
+            const zipBlob = new Blob([resp.data], { type: 'application/zip' });
+
+            // Create a temporary link element to trigger the download
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(zipBlob);
+            link.download = 'output.zip';
+
+            // Trigger the download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
           } else {
             this.$message.error('Failed to load model: ' + resp.data.msg)
+            this.isRunningBatch = false
+            this.isLoadingModel = false
           }
         } else {
           this.$message.error('Error unable to get audio file')
+          this.isRunningBatch = false
+          this.isLoadingModel = false
         }
       } catch (e) {
         this.$message.error('Failed to run: ' + e)
+      } finally {
+        this.isRunningBatch = false
+        this.isLoadingModel = false
       }
     },
   }
