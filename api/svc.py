@@ -160,20 +160,21 @@ class SingleInferenceHandler(api.base.ApiHandler):
             th = float(th)
             ns = float(ns)
 
-            output_audio_array = _svc.inference(srcaudio=scraudio,
-                                                chara=dsid,
-                                                tran=tran,
-                                                slice_db=th,
-                                                ns=ns)
+            output_audio_sr, output_audio_array = _svc.inference(srcaudio=scraudio,
+                                                                 chara=dsid,
+                                                                 tran=tran,
+                                                                 slice_db=th,
+                                                                 ns=ns)
 
             logger.debug(f"svc for {audiofile_name} succeed. \n"
-                         f"audio data type: {type(output_audio_array)}")
+                         f"audio data type: {type(output_audio_array)}\n"
+                         f"audio data sr: {output_audio_sr}")
 
             logger.debug(f"start output data.")
 
             # Convert the NumPy array to WAV format
             with io.BytesIO() as wav_file:
-                wavfile.write(wav_file, sampling_rate, audio_data.astype(np.float32))
+                wavfile.write(wav_file, sampling_rate, output_audio_array.astype(np.float32))
                 wav_data = wav_file.getvalue()
 
             # set the response headers and body
