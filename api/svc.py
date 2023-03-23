@@ -182,24 +182,6 @@ class SingleInferenceHandler(api.base.ApiHandler):
             self.set_header('Content-Disposition', f'attachment; filename="svc_output.wav"')
             self.write(wav_data)
             await self.flush()
-
-            # create a new wave file for writing
-            # with io.BytesIO() as file_stream:
-            #     with wave.open(file_stream, 'wb') as wave_file:
-            #         # set the wave file parameters
-            #         wave_file.setnchannels(num_channels)
-            #         wave_file.setsampwidth(samp_width)
-            #         wave_file.setframerate(sampling_rate)
-            #         # write the audio data to the wave file
-            #         wave_file.writeframes(output_audio_array.tobytes())
-            #
-            #     # set the response headers and body
-            #     self.set_header('Content-Type', 'audio/wav')
-            #     self.set_header('Content-Disposition', f'attachment; filename="svc_{audiofile_name}.wav"')
-            #     self.write(file_stream.getvalue())
-            #     await self.flush()
-            #     await self.finish()
-            #     logger.debug(f"response completed.")
         except Exception as e:
             logger.exception(e)
             self.set_status(500)
@@ -291,6 +273,7 @@ class BatchInferenceHandler(api.base.ApiHandler):
             self.set_header("Content-Disposition", "attachment; filename=output.zip")
             with open("output.zip", "rb") as file:
                 self.write(file.read())
+            await self.flush()
         except Exception as e:
             logger.exception(e)
             self.set_status(500)
