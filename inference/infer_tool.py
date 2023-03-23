@@ -264,4 +264,4 @@ class Svc(object):
             _audio = _audio[pad_len:-pad_len]
             audio.extend(list(_audio))
         audio = (np.array(audio) * 32768).astype('int16')
-        return (self.hps_ms.data.sampling_rate, audio)
+        return self.hps_ms.data.sampling_rate, audio

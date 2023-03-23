@@ -25,6 +25,7 @@ http://obs.cstcloud.cn/share/obs/sankagenkeshi/checkpoint_best_legacy_500.pt
 2. 运行
 ```bash
 pip install -r requirements.txt
+pip install setuptools==59.5.0
 ```
 安装依赖
 

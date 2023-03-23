@@ -107,6 +107,8 @@ class SwitchHandler(api.base.ApiHandler):
 class SingleInferenceHandler(api.base.ApiHandler):
     async def post(self):
         try:
+            from scipy.io import wavfile
+
             dsid = self.get_argument("dsid", "")
             tran = self.get_argument("tran", "0")
             th = self.get_argument("th", "-40.0")
@@ -141,6 +143,7 @@ class SingleInferenceHandler(api.base.ApiHandler):
                     audio_data = wave_file.readframes(-1)
                     # get the sampling rate
                     sampling_rate = wave_file.getframerate()
+                    samp_width = wave_file.getsampwidth()
                     # get the number of channels and sample width
                     num_channels = wave_file.getnchannels()
                     # sample_width = wave_file.getsampwidth()
@@ -163,22 +166,39 @@ class SingleInferenceHandler(api.base.ApiHandler):
                                                 slice_db=th,
                                                 ns=ns)
 
-            logger.debug(f"svc for {audiofile_name} succeed.")
+            logger.debug(f"svc for {audiofile_name} succeed. \n"
+                         f"audio data type: {type(output_audio_array)}")
+
+            logger.debug(f"start output data.")
+
+            # Convert the NumPy array to WAV format
+            with io.BytesIO() as wav_file:
+                wavfile.write(wav_file, sampling_rate, audio_data.astype(np.float32))
+                wav_data = wav_file.getvalue()
+
+            # set the response headers and body
+            self.set_header('Content-Type', 'audio/wav')
+            self.set_header('Content-Disposition', f'attachment; filename="svc_output.wav"')
+            self.write(wav_data)
+            await self.flush()
 
             # create a new wave file for writing
-            with io.BytesIO() as file_stream:
-                with wave.open(file_stream, 'wb') as wave_file:
-                    # set the wave file parameters
-                    wave_file.setnchannels(output_audio_array.shape[1])
-                    wave_file.setsampwidth(2)
-                    wave_file.setframerate(44100)
-                    # write the audio data to the wave file
-                    wave_file.writeframes(output_audio_array.tobytes())
-
-                # set the response headers and body
-                self.set_header('Content-Type', 'audio/wav')
-                self.set_header('Content-Disposition', f'attachment; filename="svc_{audiofile_name}.wav"')
-                self.write(file_stream.getvalue())
+            # with io.BytesIO() as file_stream:
+            #     with wave.open(file_stream, 'wb') as wave_file:
+            #         # set the wave file parameters
+            #         wave_file.setnchannels(num_channels)
+            #         wave_file.setsampwidth(samp_width)
+            #         wave_file.setframerate(sampling_rate)
+            #         # write the audio data to the wave file
+            #         wave_file.writeframes(output_audio_array.tobytes())
+            #
+            #     # set the response headers and body
+            #     self.set_header('Content-Type', 'audio/wav')
+            #     self.set_header('Content-Disposition', f'attachment; filename="svc_{audiofile_name}.wav"')
+            #     self.write(file_stream.getvalue())
+            #     await self.flush()
+            #     await self.finish()
+            #     logger.debug(f"response completed.")
         except Exception as e:
             logger.exception(e)
             self.set_status(500)
