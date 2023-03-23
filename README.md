@@ -5,6 +5,10 @@
 - 支持批量转换，输出文件名暂定为原文件名，执行打包下载；
 - 添加人声提取Tab，需要Spleeter；
 - Python 3.8。
+- Gradio框架：python main.py 简单快捷
+- Tornado框架可以python maint.py 鲁棒性强点
+- Tornado框架目前api only
+- TBD：a frontend webpage for tornado framework
 
 
 
@@ -34,3 +38,7 @@ pip install setuptools==59.5.0
 python main.py
 ```
 运行程序
+
+
+## Known Issue
+- Gradio在本地运行OK，但是在服务端由于需要经过Nginx/Apache的反向代理以及Gradio的queue机制（websocket）经常reset导致不能正常运行。

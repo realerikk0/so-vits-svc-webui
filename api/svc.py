@@ -182,6 +182,7 @@ class SingleInferenceHandler(api.base.ApiHandler):
             self.set_header('Content-Disposition', f'attachment; filename="svc_output.wav"')
             self.write(wav_data)
             await self.flush()
+            logger.debug(f"response completed.")
         except Exception as e:
             logger.exception(e)
             self.set_status(500)
@@ -268,12 +269,14 @@ class BatchInferenceHandler(api.base.ApiHandler):
 
             # todo: remove data
 
+            logger.debug(f"start output data.")
             # set response header and body
             self.set_header("Content-Type", "application/zip")
             self.set_header("Content-Disposition", "attachment; filename=output.zip")
             with open(zipfilename, "rb") as file:
                 self.write(file.read())
             await self.flush()
+            logger.debug(f"response completed.")
         except Exception as e:
             logger.exception(e)
             self.set_status(500)
