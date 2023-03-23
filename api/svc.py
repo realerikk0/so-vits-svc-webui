@@ -174,7 +174,7 @@ class SingleInferenceHandler(api.base.ApiHandler):
 
             # Convert the NumPy array to WAV format
             with io.BytesIO() as wav_file:
-                wavfile.write(wav_file, sampling_rate, output_audio_array.astype(np.float32))
+                wavfile.write(wav_file, sampling_rate, output_audio_array)
                 wav_data = wav_file.getvalue()
 
             # set the response headers and body
