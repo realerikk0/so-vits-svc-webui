@@ -271,7 +271,7 @@ class BatchInferenceHandler(api.base.ApiHandler):
             # set response header and body
             self.set_header("Content-Type", "application/zip")
             self.set_header("Content-Disposition", "attachment; filename=output.zip")
-            with open("output.zip", "rb") as file:
+            with open(zipfilename, "rb") as file:
                 self.write(file.read())
             await self.flush()
         except Exception as e:
