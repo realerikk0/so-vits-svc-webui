@@ -253,7 +253,7 @@ class BatchInferenceHandler(api.base.ApiHandler):
                 audio_filebody = file["body"]
                 filename = os.path.basename(audio_filename)
 
-                print(f"{idx}, {file}, {filename}")
+                print(f"{idx}, {len(audio_filebody)}, {filename}")
                 sampling_rate, audio = wavfile.read(io.BytesIO(audio_filebody))
                 output_sampling_rate, output_audio = _svc.inference((sampling_rate, audio), chara=dsid, tran=tran,
                                                                     slice_db=th, ns=ns)
