@@ -53,7 +53,7 @@
               ref="audioSingleUpload"
               class="audio-upload"
               action=""
-              accept=".wav"
+              accept=".wav,.mp3,.mp4"
               :auto-upload="false"
           >
             <template #trigger>
@@ -81,7 +81,7 @@
               ref="audioBatchUpload"
               class="audio-upload"
               action=""
-              accept=".wav"
+              accept=".wav,.mp3,.mp4"
               :auto-upload="false"
               multiple
           >
