@@ -10,8 +10,8 @@ import axios from "axios";
 import './assets/main.css'
 
 
-axios.defaults.baseURL = 'http://192.168.0.17:8080' // 这里填写服务器的地址
-axios.defaults.timeout = 10 * 1000
+axios.defaults.baseURL = 'http://127.0.0.1:7870' // 这里填写服务器的地址
+axios.defaults.timeout = 10 * 60 * 1000
 
 const app = createApp(App)
 

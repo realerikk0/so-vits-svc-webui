@@ -220,6 +220,8 @@ class BatchInferenceHandler(api.base.ApiHandler):
             ns = self.get_argument("ns", "0.4")
             audiofile_dict = self.request.files.get("srcaudio", [])
 
+            logger.debug(len(self.request.files))
+
             if not audiofile_dict:
                 self.set_status(400)
                 self.write({
