@@ -7,6 +7,7 @@ import os
 import io
 import wave
 import numpy as np
+from service.tool import audio_normalize
 
 logger = logging.getLogger(__name__)
 
@@ -137,6 +138,17 @@ class SingleInferenceHandler(api.base.ApiHandler):
             audiofile_body = audiofile['body']
             audiofile_name = audiofile['filename']
 
+            audiofile_extension = os.path.splitext(audiofile_name)[1].lower()
+            if audiofile_extension != "wav":
+                logger.debug(f"file format is {audiofile_extension}, not wav\n"
+                             f"converting to standard wav data...")
+                converted_file = await audio_normalize(full_filename=audiofile_name, file_data=audiofile_body)
+                with wave.open(converted_file, 'rb') as wav_file:
+                    num_frames = wav_file.getnframes()
+                    audiofile_body = wav_file.readframes(num_frames)
+                    logger.debug(f"wav conversion completed.")
+                    os.remove(converted_file)
+
             with io.BytesIO(audiofile_body) as file_stream:
                 with wave.open(file_stream, 'rb') as wave_file:
                     # get the audio data as a byte string
@@ -253,6 +265,17 @@ class BatchInferenceHandler(api.base.ApiHandler):
                 audio_filename = file["filename"]
                 audio_filebody = file["body"]
                 filename = os.path.basename(audio_filename)
+                audiofile_extension = os.path.splitext(audio_filename)[1].lower()
+
+                if audiofile_extension != "wav":
+                    logger.debug(f"file format is {audiofile_extension}, not wav\n"
+                                 f"converting to standard wav data...")
+                    converted_file = await audio_normalize(full_filename=audio_filename, file_data=audiofile_body)
+                    with wave.open(converted_file, 'rb') as wav_file:
+                        num_frames = wav_file.getnframes()
+                        audiofile_body = wav_file.readframes(num_frames)
+                        logger.debug(f"wav conversion completed.")
+                        os.remove(converted_file)
 
                 print(f"{idx}, {len(audio_filebody)}, {filename}")
                 sampling_rate, audio = wavfile.read(io.BytesIO(audio_filebody))
