@@ -53,7 +53,7 @@
               ref="audioSingleUpload"
               class="audio-upload"
               action=""
-              accept=".wav"
+              accept=".wav,.mp3"
               :http-request="handleSingleUpload"
           >
             <template #trigger>
@@ -77,7 +77,7 @@
               ref="audioBatchUpload"
               class="audio-upload"
               action=""
-              accept=".wav"
+              accept=".wav,.mp3"
               :http-request="mergeBatchFiles"
               multiple
           >
