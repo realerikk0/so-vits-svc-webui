@@ -61,7 +61,9 @@ export default {
           let runData = new FormData()
           runData.append("srcaudio", srcaudio)
 
-          let resp = await axios.post('/api/vm/run', runData)
+          let resp = await axios.post('/api/vm/run', runData, {
+            responseType: 'arraybuffer'
+          })
           if (resp.status === 200) {
             const zipBlob = new Blob([resp.data], { type: 'application/zip' });
 
