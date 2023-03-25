@@ -9,6 +9,7 @@ import config
 import api.main
 import api.svc
 import api.tool
+import api.vm
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,8 @@ routes = [
     (r'/api/svc/switch', api.svc.SwitchHandler),
     (r'/api/svc/run', api.svc.SingleInferenceHandler),
     (r'/api/svc/batch', api.svc.BatchInferenceHandler),
+
+    (r'/api/vm/run', api.vm.VocalRemoverHandler),
 
     (r'/api/tool/norm', api.tool.AudioNormalizerHandler),
 

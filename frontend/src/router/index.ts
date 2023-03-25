@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LayoutFrame from '../layout/LayoutFrame.vue'
 import SVCView from "../views/SVCView.vue";
 import HomeView from "../views/HomeView.vue";
+import RMView from "../views/RMView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,6 +13,7 @@ const router = createRouter({
       children: [
         { path: '', component: HomeView },
         { path: 'svc', name:'svc', component: SVCView},
+        { path: 'rm', name: 'rm', component: RMView },
       ]
     },
     {
