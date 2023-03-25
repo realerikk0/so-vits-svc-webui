@@ -71,7 +71,7 @@ export default {
           let runData = new FormData()
           runData.append("srcaudio", srcaudio)
 
-          let resp = await axios.post('/api/rm/run', runData)
+          let resp = await axios.post('/api/vm/run', runData)
           if (resp.status === 200) {
             this.receivedFiles.push(resp.data[0])
             this.receivedFiles.push(resp.data[1])
