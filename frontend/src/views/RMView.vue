@@ -28,15 +28,6 @@
     </div>
 
 <!--    <GreetingAudio :title="audioTitle" :src="audioSrc" v-if="audioLoaded"></GreetingAudio>-->
-    <div class="download-list" v-if="receivedFiles.length > 0">
-      <h1>Received WAV Files:</h1>
-      <ul>
-        <li v-for="file in receivedFiles" :key="file.name">
-          {{ file.name }} ({{ file.size }} bytes) -
-          <a :href="getFileURL(file)" download>Download</a>
-        </li>
-      </ul>
-    </div>
   </div>
 </template>
 
@@ -54,7 +45,6 @@ export default {
         srcaudio: null,
       },
       isRuningSingle: false,
-      receivedFiles: []
     }
   },
   mounted() {
@@ -73,8 +63,19 @@ export default {
 
           let resp = await axios.post('/api/vm/run', runData)
           if (resp.status === 200) {
-            this.receivedFiles.push(resp.data[0])
-            this.receivedFiles.push(resp.data[1])
+            const zipBlob = new Blob([resp.data], { type: 'application/zip' });
+
+            // Create a temporary link element to trigger the download
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(zipBlob);
+            link.download = 'output.zip';
+
+            // Trigger the download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            this.isRuningSingle = false
           } else {
             this.$message.error('Failed to load model: ' + resp.data.msg)
             this.isRuningSingle = false
