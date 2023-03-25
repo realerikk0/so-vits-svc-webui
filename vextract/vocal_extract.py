@@ -32,7 +32,7 @@ class VEX(object):
         import uuid
         sampling_rate, audio = srcaudio
 
-        temp_filename = f"splt_{uuid}.wav"
+        temp_filename = f"splt_{uuid.uuid4()}.wav"
         wavfile.write(temp_filename, sampling_rate, audio)
 
         subprocess.run([

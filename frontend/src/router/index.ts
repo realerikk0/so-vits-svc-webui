@@ -13,7 +13,7 @@ const router = createRouter({
       children: [
         { path: '', component: HomeView },
         { path: 'svc', name:'svc', component: SVCView},
-        { path: 'rm', name: 'rm', component: RMView },
+        { path: 'vm', name: 'vm', component: RMView },
       ]
     },
     {

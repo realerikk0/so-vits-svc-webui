@@ -16,7 +16,7 @@
       <el-menu-item index="/">
         <el-icon><RefreshRight /></el-icon>DiffSinger生成
       </el-menu-item>
-      <el-menu-item :index="$router.resolve({ name: 'rm' }).href">
+      <el-menu-item :index="$router.resolve({ name: 'vm' }).href">
         <el-icon><EditPen /></el-icon>歌曲音声分离
       </el-menu-item>
       <a href="https://github.com/realerikk0/so-vits-svc-webui" target="_blank">

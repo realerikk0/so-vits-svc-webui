@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 class VocalRemoverHandler(api.base.ApiHandler):
     async def post(self):
         try:
-            import uuid
             uploaded_file = self.request.files['srcaudio'][0]
             audiofile_body = uploaded_file['body']
             # audiofile_name = uploaded_file['filename']
