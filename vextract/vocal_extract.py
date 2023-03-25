@@ -32,7 +32,8 @@ class VEX(object):
         import uuid
         sampling_rate, audio = srcaudio
 
-        temp_filename = f"splt_{uuid.uuid4()}.wav"
+        temp_filebasename = f"splt_{uuid.uuid4()}"
+        temp_filename = f"{temp_filebasename}.wav"
         wavfile.write(temp_filename, sampling_rate, audio)
 
         subprocess.run([
@@ -42,8 +43,8 @@ class VEX(object):
             temp_filename
         ])
 
-        vocal_file = f"output/samtmpwav/vocals.wav"
-        accompaniment_file = f"output/samtmpwav/accompaniment.wav"
+        vocal_file = f"output/{temp_filebasename}/vocals.wav"
+        accompaniment_file = f"output/{temp_filebasename}/accompaniment.wav"
 
         with wave.open(vocal_file, 'rb') as wav_file:
             num_frames = wav_file.getnframes()
