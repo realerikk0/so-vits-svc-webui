@@ -12,6 +12,8 @@ async def audio_normalize(full_filename, file_data):
         file_name = os.path.splitext(full_filename)[0]
         file_extension = os.path.splitext(full_filename)[1].lower()
 
+        logger.debug(f"normalizing {full_filename}")
+
         with tempfile.NamedTemporaryFile(suffix=file_extension, delete=False) as temp_file:
             temp_file.write(file_data)
             temp_file.flush()

@@ -138,8 +138,8 @@ class SingleInferenceHandler(api.base.ApiHandler):
             audiofile_body = audiofile['body']
             audiofile_name = audiofile['filename']
 
-            audiofile_extension = os.path.splitext(audiofile_name)[1].lower()
-            if audiofile_extension != "wav":
+            audiofile_extension = os.path.splitext(audiofile_name)[-1].lower()
+            if audiofile_extension != ".wav":
                 logger.debug(f"file format is {audiofile_extension}, not wav\n"
                              f"converting to standard wav data...")
                 converted_file = await audio_normalize(full_filename=audiofile_name, file_data=audiofile_body)
@@ -267,12 +267,12 @@ class BatchInferenceHandler(api.base.ApiHandler):
                 audio_filename = file["filename"]
                 audio_filebody = file["body"]
                 filename = os.path.basename(audio_filename)
-                audiofile_extension = os.path.splitext(audio_filename)[1].lower()
+                audiofile_extension = os.path.splitext(audio_filename)[-1].lower()
 
-                if audiofile_extension != "wav":
+                if audiofile_extension != ".wav":
                     logger.debug(f"file format is {audiofile_extension}, not wav\n"
                                  f"converting to standard wav data...")
-                    converted_file = await audio_normalize(full_filename=audio_filename, file_data=audiofile_body)
+                    converted_file = await audio_normalize(full_filename=audio_filename, file_data=audio_filebody)
                     with wave.open(converted_file, 'rb') as wav_file:
                         num_frames = wav_file.getnframes()
                         audiofile_body = wav_file.readframes(num_frames)
