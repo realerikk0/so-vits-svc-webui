@@ -1,21 +1,21 @@
-gradio==3.20.0
-librosa==0.10.0
---extra-index-url https://download.pytorch.org/whl/cu113
-torch==1.10.0+cu113
---extra-index-url https://download.pytorch.org/whl/cu113
-torchaudio==0.10.0+cu113
-# torch==1.10.0
-# torchaudio==0.10.0
-scipy==1.7.3
+# --extra-index-url https://download.pytorch.org/whl/cu113
+# torch==1.10.0+cu113
+# --extra-index-url https://download.pytorch.org/whl/cu113
+# torchaudio==0.10.0+cu113
+torch==1.10.0
+torchaudio==0.10.0
+scipy
 numpy
-SoundFile==0.12.1
 praat-parselmouth
 scikit-maad
 torchvision
 fairseq
 pyworld
-aiohttp==3.8.4
+aiohttp
 tornado
-setuptools==59.5.0
 spleeter
 pymusic-dl
+gradio
+librosa==0.9.0
+setuptools==59.5.0
+SoundFile
