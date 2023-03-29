@@ -1,6 +1,7 @@
 import io
 import os
 import subprocess
+import tempfile
 import wave
 
 import librosa
@@ -31,6 +32,10 @@ class VEX(object):
     def separate(self, srcaudio=None):
         import uuid
         sampling_rate, audio = srcaudio
+
+        # Make sure the NumPy array has an integer data type
+        if not np.issubdtype(audio.dtype, np.integer):
+            raise ValueError("The input NumPy array must have an integer data type.")
 
         temp_filebasename = f"splt_{uuid.uuid4()}"
         temp_filename = f"{temp_filebasename}.wav"

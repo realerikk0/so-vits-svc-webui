@@ -16,3 +16,6 @@ fairseq
 pyworld
 aiohttp==3.8.4
 tornado
+setuptools==59.5.0
+spleeter
+pymusic-dl
