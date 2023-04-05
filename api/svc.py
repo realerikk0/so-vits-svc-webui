@@ -157,35 +157,6 @@ class SingleInferenceHandler(api.base.ApiHandler):
                 sampling_rate, audio_array = read_wav_file_to_numpy_array(converted_file)
                 os.remove(converted_file)
 
-
-            # if audio_fileext != ".wav":
-            #     logger.debug(f"file format is {audio_fileext}, not wav\n"
-            #                  f"converting to standard wav data...")
-            #     converted_file = await audio_normalize(full_filename=audio_filename, file_data=audio_filebody)
-            #     with wave.open(converted_file, 'rb') as wav_file:
-            #         sampling_rate = wav_file.getframerate()
-            #         audio_filebody = wav_file.readframes(wav_file.getnframes())
-            #         # sample_width = wav_file.getsampwidth()
-            #         logger.debug(f"wav conversion completed.")
-            #     # os.remove(converted_file)
-            #
-            # # with io.BytesIO(audiofile_body) as file_stream:
-            # #     with wave.open(file_stream, 'rb') as wave_file:
-            # #         # get the audio data as a byte string
-            # #         audio_data = wave_file.readframes(-1)
-            # #         # get the sampling rate
-            # #         sampling_rate = wave_file.getframerate()
-            # #         samp_width = wave_file.getsampwidth()
-            # #         # get the number of channels and sample width
-            # #         num_channels = wave_file.getnchannels()
-            # #         # sample_width = wave_file.getsampwidth()
-            # #
-            # # audio_array = np.frombuffer(audio_data, dtype=np.int16)
-            # # audio_array = np.reshape(audio_array, (-1, num_channels))
-            #
-            # audio_array = np.frombuffer(audio_filebody, dtype=np.int16)
-            # # sampling_rate, audio_array = wavfile.read(io.BytesIO(audio_filebody))
-
             scraudio = (sampling_rate, audio_array)
 
             logger.debug(f"read file {audio_filename}\n"
@@ -322,16 +293,6 @@ class BatchInferenceHandler(api.base.ApiHandler):
 
                     sampling_rate, audio_array = read_wav_file_to_numpy_array(converted_file)
                     os.remove(converted_file)
-
-                # if audiofile_extension != ".wav":
-                #     logger.debug(f"file format is {audiofile_extension}, not wav\n"
-                #                  f"converting to standard wav data...")
-                #     converted_file = await audio_normalize(full_filename=audio_filename, file_data=audio_filebody)
-                #     with wave.open(converted_file, 'rb') as wav_file:
-                #         num_frames = wav_file.getnframes()
-                #         audio_filebody = wav_file.readframes(num_frames)
-                #         logger.debug(f"wav conversion completed.")
-                #     os.remove(converted_file)
 
                 scraudio = (sampling_rate, audio_array)
 
