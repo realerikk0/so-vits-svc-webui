@@ -146,13 +146,14 @@ class SingleInferenceHandler(api.base.ApiHandler):
                 temp_file.write(audio_filebody)
                 temp_file.close()
 
-                if audio_fileext != ".wav":
-                    logger.debug(f"file format is {audio_fileext}, not wav\n"
-                                 f"converting to standard wav data...")
-                    converted_file = await audio_normalize(full_filename=audio_filename, file_data=audio_filebody)
-                    logger.debug(f"wav conversion completed.")
-                else:
-                    converted_file = temp_file.name
+                converted_file = await audio_normalize(full_filename=audio_filename, file_data=audio_filebody)
+                # if audio_fileext != ".wav":
+                #     logger.debug(f"file format is {audio_fileext}, not wav\n"
+                #                  f"converting to standard wav data...")
+                #     converted_file = await audio_normalize(full_filename=audio_filename, file_data=audio_filebody)
+                #     logger.debug(f"wav conversion completed.")
+                # else:
+                #     converted_file = temp_file.name
 
                 sampling_rate, audio_array = read_wav_file_to_numpy_array(converted_file)
                 os.remove(converted_file)
@@ -283,13 +284,15 @@ class BatchInferenceHandler(api.base.ApiHandler):
                     temp_file.write(audio_filebody)
                     temp_file.close()
 
-                    if audio_fileext != ".wav":
-                        logger.debug(f"file format is {audio_fileext}, not wav\n"
-                                     f"converting to standard wav data...")
-                        converted_file = await audio_normalize(full_filename=audio_filename, file_data=audio_filebody)
-                        logger.debug(f"wav conversion completed.")
-                    else:
-                        converted_file = temp_file.name
+                    converted_file = await audio_normalize(full_filename=audio_filename, file_data=audio_filebody)
+
+                    # if audio_fileext != ".wav":
+                    #     logger.debug(f"file format is {audio_fileext}, not wav\n"
+                    #                  f"converting to standard wav data...")
+                    #     converted_file = await audio_normalize(full_filename=audio_filename, file_data=audio_filebody)
+                    #     logger.debug(f"wav conversion completed.")
+                    # else:
+                    #     converted_file = temp_file.name
 
                     sampling_rate, audio_array = read_wav_file_to_numpy_array(converted_file)
                     os.remove(converted_file)
