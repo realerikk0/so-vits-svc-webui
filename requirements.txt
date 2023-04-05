@@ -1,9 +1,9 @@
-# --extra-index-url https://download.pytorch.org/whl/cu113
-# torch==1.10.0+cu113
-# --extra-index-url https://download.pytorch.org/whl/cu113
-# torchaudio==0.10.0+cu113
-torch==1.10.0
-torchaudio==0.10.0
+--extra-index-url https://download.pytorch.org/whl/cu113
+torch==1.10.0+cu113
+--extra-index-url https://download.pytorch.org/whl/cu113
+torchaudio==0.10.0+cu113
+# torch==1.10.0
+# torchaudio==0.10.0
 scipy
 numpy
 praat-parselmouth
@@ -16,6 +16,6 @@ tornado
 spleeter
 pymusic-dl
 gradio
-librosa==0.8.0
+librosa==0.8.1
 setuptools==59.5.0
 SoundFile

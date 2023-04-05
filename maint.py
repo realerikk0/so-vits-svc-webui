@@ -72,7 +72,7 @@ def run_server(host, port, debug):
         routes,
         websocket_ping_interval=10,
         debug=debug,
-        autoreload=False
+        autoreload=True
     )
     cfg = config.get_config()
     try:

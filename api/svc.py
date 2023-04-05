@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
+import tempfile
+
 from inference.infer_tool import Svc
 from typing import *
 import api.base
@@ -7,7 +9,8 @@ import os
 import io
 import wave
 import numpy as np
-from service.tool import audio_normalize
+from service.tool import audio_normalize, read_wav_file_to_numpy_array
+from utils import get_hparams_from_file
 
 logger = logging.getLogger(__name__)
 
@@ -135,50 +138,78 @@ class SingleInferenceHandler(api.base.ApiHandler):
                 return
 
             audiofile = audiofile_dict[0]
-            audiofile_body = audiofile['body']
-            audiofile_name = audiofile['filename']
+            audio_filename = audiofile['filename']
+            audio_filebody = audiofile['body']
+            audio_fileext = os.path.splitext(audio_filename)[-1].lower()
 
-            audiofile_extension = os.path.splitext(audiofile_name)[-1].lower()
-            if audiofile_extension != ".wav":
-                logger.debug(f"file format is {audiofile_extension}, not wav\n"
-                             f"converting to standard wav data...")
-                converted_file = await audio_normalize(full_filename=audiofile_name, file_data=audiofile_body)
-                with wave.open(converted_file, 'rb') as wav_file:
-                    num_frames = wav_file.getnframes()
-                    audiofile_body = wav_file.readframes(num_frames)
+            with tempfile.NamedTemporaryFile(suffix=audio_fileext, delete=False) as temp_file:
+                temp_file.write(audio_filebody)
+                temp_file.close()
+
+                if audio_fileext != ".wav":
+                    logger.debug(f"file format is {audio_fileext}, not wav\n"
+                                 f"converting to standard wav data...")
+                    converted_file = await audio_normalize(full_filename=audio_filename, file_data=audio_filebody)
                     logger.debug(f"wav conversion completed.")
-                    os.remove(converted_file)
+                else:
+                    converted_file = temp_file.name
 
-            with io.BytesIO(audiofile_body) as file_stream:
-                with wave.open(file_stream, 'rb') as wave_file:
-                    # get the audio data as a byte string
-                    audio_data = wave_file.readframes(-1)
-                    # get the sampling rate
-                    sampling_rate = wave_file.getframerate()
-                    samp_width = wave_file.getsampwidth()
-                    # get the number of channels and sample width
-                    num_channels = wave_file.getnchannels()
-                    # sample_width = wave_file.getsampwidth()
+                sampling_rate, audio_array = read_wav_file_to_numpy_array(converted_file)
+                os.remove(converted_file)
 
-            audio_array = np.frombuffer(audio_data, dtype=np.int16)
-            audio_array = np.reshape(audio_array, (-1, num_channels))
+
+            # if audio_fileext != ".wav":
+            #     logger.debug(f"file format is {audio_fileext}, not wav\n"
+            #                  f"converting to standard wav data...")
+            #     converted_file = await audio_normalize(full_filename=audio_filename, file_data=audio_filebody)
+            #     with wave.open(converted_file, 'rb') as wav_file:
+            #         sampling_rate = wav_file.getframerate()
+            #         audio_filebody = wav_file.readframes(wav_file.getnframes())
+            #         # sample_width = wav_file.getsampwidth()
+            #         logger.debug(f"wav conversion completed.")
+            #     # os.remove(converted_file)
+            #
+            # # with io.BytesIO(audiofile_body) as file_stream:
+            # #     with wave.open(file_stream, 'rb') as wave_file:
+            # #         # get the audio data as a byte string
+            # #         audio_data = wave_file.readframes(-1)
+            # #         # get the sampling rate
+            # #         sampling_rate = wave_file.getframerate()
+            # #         samp_width = wave_file.getsampwidth()
+            # #         # get the number of channels and sample width
+            # #         num_channels = wave_file.getnchannels()
+            # #         # sample_width = wave_file.getsampwidth()
+            # #
+            # # audio_array = np.frombuffer(audio_data, dtype=np.int16)
+            # # audio_array = np.reshape(audio_array, (-1, num_channels))
+            #
+            # audio_array = np.frombuffer(audio_filebody, dtype=np.int16)
+            # # sampling_rate, audio_array = wavfile.read(io.BytesIO(audio_filebody))
 
             scraudio = (sampling_rate, audio_array)
 
-            logger.debug(f"read file {audiofile_name}\n"
+            logger.debug(f"read file {audio_filename}\n"
                          f"sampling rate: {sampling_rate}")
 
             tran = float(tran)
             th = float(th)
             ns = float(ns)
 
+            hparams = get_hparams_from_file(f"checkpoints/{dsid}/config.json")
+            spk = hparams.spk
+            real_dsid = ""
+            for k, v in spk.items():
+                if v == 0:
+                    real_dsid = k
+            logger.debug(f"read dsid is: {real_dsid}")
+
             output_audio_sr, output_audio_array = _svc.inference(srcaudio=scraudio,
-                                                                 chara=dsid,
+                                                                 chara=real_dsid,
                                                                  tran=tran,
                                                                  slice_db=th,
                                                                  ns=ns)
 
-            logger.debug(f"svc for {audiofile_name} succeed. \n"
+            logger.debug(f"svc for {audio_filename} succeed. \n"
                          f"audio data type: {type(output_audio_array)}\n"
                          f"audio data sr: {output_audio_sr}")
 
@@ -263,25 +294,50 @@ class BatchInferenceHandler(api.base.ApiHandler):
             th = float(th)
             ns = float(ns)
 
+            hparams = get_hparams_from_file(f"checkpoints/{dsid}/config.json")
+            spk = hparams.spk
+            real_dsid = ""
+            for k, v in spk.items():
+                if v == 0:
+                    real_dsid = k
+            logger.debug(f"read dsid is: {real_dsid}")
+
             for idx, file in enumerate(audiofile_dict):
                 audio_filename = file["filename"]
                 audio_filebody = file["body"]
                 filename = os.path.basename(audio_filename)
-                audiofile_extension = os.path.splitext(audio_filename)[-1].lower()
+                audio_fileext = os.path.splitext(audio_filename)[-1].lower()
 
-                if audiofile_extension != ".wav":
-                    logger.debug(f"file format is {audiofile_extension}, not wav\n"
-                                 f"converting to standard wav data...")
-                    converted_file = await audio_normalize(full_filename=audio_filename, file_data=audio_filebody)
-                    with wave.open(converted_file, 'rb') as wav_file:
-                        num_frames = wav_file.getnframes()
-                        audiofile_body = wav_file.readframes(num_frames)
+                with tempfile.NamedTemporaryFile(suffix=audio_fileext, delete=False) as temp_file:
+                    temp_file.write(audio_filebody)
+                    temp_file.close()
+
+                    if audio_fileext != ".wav":
+                        logger.debug(f"file format is {audio_fileext}, not wav\n"
+                                     f"converting to standard wav data...")
+                        converted_file = await audio_normalize(full_filename=audio_filename, file_data=audio_filebody)
                         logger.debug(f"wav conversion completed.")
-                        os.remove(converted_file)
+                    else:
+                        converted_file = temp_file.name
+
+                    sampling_rate, audio_array = read_wav_file_to_numpy_array(converted_file)
+                    os.remove(converted_file)
+
+                # if audiofile_extension != ".wav":
+                #     logger.debug(f"file format is {audiofile_extension}, not wav\n"
+                #                  f"converting to standard wav data...")
+                #     converted_file = await audio_normalize(full_filename=audio_filename, file_data=audio_filebody)
+                #     with wave.open(converted_file, 'rb') as wav_file:
+                #         num_frames = wav_file.getnframes()
+                #         audio_filebody = wav_file.readframes(num_frames)
+                #         logger.debug(f"wav conversion completed.")
+                #     os.remove(converted_file)
+
+                scraudio = (sampling_rate, audio_array)
 
                 print(f"{idx}, {len(audio_filebody)}, {filename}")
-                sampling_rate, audio = wavfile.read(io.BytesIO(audio_filebody))
-                output_sampling_rate, output_audio = _svc.inference((sampling_rate, audio), chara=dsid, tran=tran,
+
+                output_sampling_rate, output_audio = _svc.inference(scraudio, chara=real_dsid, tran=tran,
                                                                     slice_db=th, ns=ns)
                 new_filepath = f"{tmp_workdir_name}/{filename}"
                 wavfile.write(filename=new_filepath, rate=output_sampling_rate, data=output_audio)
