@@ -11,7 +11,7 @@ import numpy as np
 from scipy.io import wavfile
 
 import api.base
-from service.tool import audio_normalize
+from service.tool import audio_normalize, read_wav_file_to_numpy_array
 from vextract.vocal_extract import VEX
 
 logger = logging.getLogger(__name__)
@@ -22,25 +22,28 @@ class VocalRemoverHandler(api.base.ApiHandler):
     async def post(self):
         try:
             uploaded_file = self.request.files['srcaudio'][0]
-            audiofile_body = uploaded_file['body']
-            audiofile_name = uploaded_file['filename']
+            audio_filebody = uploaded_file['body']
+            audio_filename = uploaded_file['filename']
+            audio_fileext = os.path.splitext(audio_filename)[-1].lower()
 
-            audiofile_extension = os.path.splitext(audiofile_name)[-1].lower()
-            if audiofile_extension != ".wav":
-                logger.debug(f"file format is {audiofile_extension}, not wav\n"
+            if audio_fileext != ".wav":
+                logger.debug(f"file format is {audio_fileext}, not wav\n"
                              f"converting to standard wav data...")
-                converted_file = await audio_normalize(full_filename=audiofile_name, file_data=audiofile_body)
+                converted_file = await audio_normalize(full_filename=audio_filename, file_data=audio_filebody)
                 with wave.open(converted_file, 'rb') as wav_file:
                     num_frames = wav_file.getnframes()
                     audiofile_body = wav_file.readframes(num_frames)
                     logger.debug(f"wav conversion completed.")
                     os.remove(converted_file)
 
-            with tempfile.NamedTemporaryFile(delete=False) as temp_wav:
+            with tempfile.NamedTemporaryFile(suffix=audio_fileext, delete=False) as temp_wav:
                 temp_wav.write(audiofile_body)
+                temp_wav.close()
 
-            sampling_rate, wav_data = wavfile.read(temp_wav.name)
-            audio_array = np.array(wav_data)
+                converted_file = await audio_normalize(full_filename=audio_filename, file_data=audio_filebody)
+
+                sampling_rate, audio_array = read_wav_file_to_numpy_array(converted_file)
+                os.remove(converted_file)
 
             print(f"Input Audio Shape: {audio_array.shape}\n"
                   f"Input Audio Data Type: {audio_array.dtype}")
