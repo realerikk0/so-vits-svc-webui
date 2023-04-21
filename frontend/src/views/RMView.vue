@@ -9,7 +9,7 @@
               ref="audioSingleUpload"
               class="audio-upload"
               action=""
-              accept=".wav,.mp3"
+              accept=".wav,.mp3,.flac"
               :http-request="handleSingleUpload"
           >
             <template #trigger>
